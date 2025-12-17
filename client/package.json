@@ -15,6 +15,7 @@
     "firebase": "^12.6.0",
     "flowbite": "^4.0.1",
     "flowbite-react": "^0.12.13",
+    "moment": "^2.30.1",
     "react": "^19.2.0",
     "react-circular-progressbar": "^2.2.0",
     "react-dom": "^19.2.0",
