@@ -90,6 +90,7 @@ export default function UpdatePost() {
       console.log(error);
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -120,6 +121,7 @@ export default function UpdatePost() {
       setPublishError('Something went wrong');
     }
   };
+
   return (
     <div className='p-3 max-w-3xl mx-auto min-h-screen'>
       <h1 className='text-center text-3xl my-7 font-semibold'>Update post</h1>
@@ -156,9 +158,9 @@ export default function UpdatePost() {
           />
           <Button
             type='button'
-            gradientDuoTone='purpleToBlue'
             size='sm'
             outline
+            className="bg-gradient-to-br from-purple-600 to-blue-500 text-white hover:bg-gradient-to-bl focus:ring-blue-300 dark:focus:ring-blue-800"
             onClick={handleUpdloadImage}
             disabled={imageUploadProgress}
           >
@@ -192,7 +194,10 @@ export default function UpdatePost() {
             setFormData({ ...formData, content: value });
           }}
         />
-        <Button type='submit' gradientDuoTone='purpleToPink'>
+        <Button
+          type='submit'
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:bg-gradient-to-l focus:ring-purple-200 dark:focus:ring-purple-800"
+        >
           Update post
         </Button>
         {publishError && (
