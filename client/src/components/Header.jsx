@@ -1,11 +1,11 @@
-import { Avatar, Button, Dropdown, Navbar, TextInput } from 'flowbite-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { AiOutlineSearch } from 'react-icons/ai';
-import { FaMoon, FaSun } from 'react-icons/fa';
-import { useSelector, useDispatch } from 'react-redux';
-import { toggleTheme } from '../redux/theme/themeSlice';
-import { signoutSuccess } from '../redux/user/userSlice';
-import { useState } from 'react';
+import { Avatar, Button, Dropdown, Navbar, TextInput } from "flowbite-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AiOutlineSearch } from "react-icons/ai";
+import { FaMoon, FaSun } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import { toggleTheme } from "../redux/theme/themeSlice";
+import { signoutSuccess } from "../redux/user/userSlice";
+import { useEffect, useState } from "react";
 
 export default function Header() {
   const location = useLocation();
@@ -13,78 +13,79 @@ export default function Header() {
   const dispatch = useDispatch();
 
   const path = location.pathname;
-
   const { currentUser } = useSelector((state) => state.user);
   const { theme } = useSelector((state) => state.theme);
 
-  // ✅ bez useEffect warninga
-  const searchFromUrl =
-    new URLSearchParams(location.search).get('searchTerm') || '';
-  const [searchTerm, setSearchTerm] = useState(searchFromUrl);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const searchTermFromUrl = urlParams.get("searchTerm");
+    if (searchTermFromUrl) setSearchTerm(searchTermFromUrl);
+  }, [location.search]);
 
   const handleSignout = async () => {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/user/signout`,
-        {
-          method: 'POST',
-          credentials: 'include',
-        }
+        { method: "POST", credentials: "include" }
       );
-      if (res.ok) {
-        dispatch(signoutSuccess());
-      }
-    } catch (error) {
-      console.log(error.message);
+      const data = await res.json();
+      if (!res.ok) console.log(data.message);
+      else dispatch(signoutSuccess());
+    } catch (err) {
+      console.log(err.message);
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate(`/search?searchTerm=${searchTerm}`);
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set("searchTerm", searchTerm);
+    navigate(`/search?${urlParams.toString()}`);
   };
 
   return (
-    <Navbar className='border-b-2'>
+    <Navbar fluid rounded className="border-b-2 px-4">
       {/* LOGO */}
       <Button
         as={Link}
-        to='/'
-        color='gray'
-        className='self-center whitespace-nowrap text-sm sm:text-xl font-semibold'
+        to="/"
+        color="gray"
+        className="self-center whitespace-nowrap text-sm sm:text-xl font-semibold"
       >
-        <span className='px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white'>
+        <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white">
           Sahand&apos;s
         </span>
-        <span className='ml-1'>Blog</span>
+        <span className="ml-1">Blog</span>
       </Button>
 
       {/* SEARCH */}
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={handleSubmit}
+        className="flex-1 mx-4 hidden lg:flex items-center"
+      >
         <TextInput
-          type='text'
-          placeholder='Search...'
-          rightIcon={AiOutlineSearch}
-          className='hidden lg:inline'
+          type="text"
+          placeholder="Search..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full"
         />
+        <Button type="submit" className="ml-2">
+          <AiOutlineSearch />
+        </Button>
       </form>
 
-      <Button className='w-12 h-10 lg:hidden' color='gray' pill>
-        <AiOutlineSearch />
-      </Button>
-
       {/* RIGHT SIDE */}
-      <div className='flex gap-2 md:order-2'>
+      <div className="flex items-center gap-2 md:order-2">
         {/* THEME TOGGLE */}
         <Button
-          className='w-12 h-10 hidden sm:inline'
-          color='gray'
-          pill
+          className="w-10 h-10 hidden sm:flex items-center justify-center"
+          color="gray"
           onClick={() => dispatch(toggleTheme())}
         >
-          {theme === 'light' ? <FaSun /> : <FaMoon />}
+          {theme === "light" ? <FaSun /> : <FaMoon />}
         </Button>
 
         {/* USER MENU */}
@@ -94,37 +95,29 @@ export default function Header() {
             inline
             label={
               <Avatar
-                alt='user'
+                alt="user"
                 img={currentUser.profilePicture}
                 rounded
               />
             }
           >
             <Dropdown.Header>
-              <span className='block text-sm'>
-                @{currentUser.username}
-              </span>
-              <span className='block text-sm font-medium truncate'>
+              <span className="block text-sm">@{currentUser.username}</span>
+              <span className="block text-sm font-medium truncate">
                 {currentUser.email}
               </span>
             </Dropdown.Header>
-
-            <Dropdown.Item as={Link} to='/dashboard?tab=profile'>
+            <Dropdown.Item as={Link} to="/dashboard?tab=profile">
               Profile
             </Dropdown.Item>
-
             <Dropdown.Divider />
-
-            <Dropdown.Item onClick={handleSignout}>
-              Sign out
-            </Dropdown.Item>
+            <Dropdown.Item onClick={handleSignout}>Sign out</Dropdown.Item>
           </Dropdown>
         ) : (
-          // ✅ UMESTO gradientDuoTone
           <Button
             as={Link}
-            to='/sign-in'
-            className='bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+            to="/sign-in"
+            className="bg-gradient-to-r from-purple-600 to-blue-500 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-blue-600 focus:ring-2 focus:ring-blue-300"
           >
             Sign In
           </Button>
@@ -135,13 +128,13 @@ export default function Header() {
 
       {/* NAV LINKS */}
       <Navbar.Collapse>
-        <Navbar.Link active={path === '/'} as={Link} to='/'>
+        <Navbar.Link active={path === "/"} as={Link} to="/">
           Home
         </Navbar.Link>
-        <Navbar.Link active={path === '/about'} as={Link} to='/about'>
+        <Navbar.Link active={path === "/about"} as={Link} to="/about">
           About
         </Navbar.Link>
-        <Navbar.Link active={path === '/projects'} as={Link} to='/projects'>
+        <Navbar.Link active={path === "/projects"} as={Link} to="/projects">
           Projects
         </Navbar.Link>
       </Navbar.Collapse>
