@@ -5,24 +5,22 @@ import { FaMoon, FaSun } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleTheme } from '../redux/theme/themeSlice';
 import { signoutSuccess } from '../redux/user/userSlice';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export default function Header() {
-  const path = useLocation().pathname;
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const path = location.pathname;
+
   const { currentUser } = useSelector((state) => state.user);
   const { theme } = useSelector((state) => state.theme);
-  const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const searchTermFromUrl = urlParams.get('searchTerm');
-    if (searchTermFromUrl) {
-      setSearchTerm(searchTermFromUrl);
-    }
-  }, [location.search]);
+  // ✅ bez useEffect warninga
+  const searchFromUrl =
+    new URLSearchParams(location.search).get('searchTerm') || '';
+  const [searchTerm, setSearchTerm] = useState(searchFromUrl);
 
   const handleSignout = async () => {
     try {
@@ -33,10 +31,7 @@ export default function Header() {
           credentials: 'include',
         }
       );
-      const data = await res.json();
-      if (!res.ok) {
-        console.log(data.message);
-      } else {
+      if (res.ok) {
         dispatch(signoutSuccess());
       }
     } catch (error) {
@@ -46,23 +41,25 @@ export default function Header() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const urlParams = new URLSearchParams(location.search);
-    urlParams.set('searchTerm', searchTerm);
-    const searchQuery = urlParams.toString();
-    navigate(`/search?${searchQuery}`);
+    navigate(`/search?searchTerm=${searchTerm}`);
   };
 
   return (
     <Navbar className='border-b-2'>
-      <Link
+      {/* LOGO */}
+      <Button
+        as={Link}
         to='/'
-        className='self-center whitespace-nowrap text-sm sm:text-xl font-semibold dark:text-white'
+        color='gray'
+        className='self-center whitespace-nowrap text-sm sm:text-xl font-semibold'
       >
         <span className='px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white'>
-          Sahand's
+          Sahand&apos;s
         </span>
-        Blog
-      </Link>
+        <span className='ml-1'>Blog</span>
+      </Button>
+
+      {/* SEARCH */}
       <form onSubmit={handleSubmit}>
         <TextInput
           type='text'
@@ -73,10 +70,14 @@ export default function Header() {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </form>
+
       <Button className='w-12 h-10 lg:hidden' color='gray' pill>
         <AiOutlineSearch />
       </Button>
+
+      {/* RIGHT SIDE */}
       <div className='flex gap-2 md:order-2'>
+        {/* THEME TOGGLE */}
         <Button
           className='w-12 h-10 hidden sm:inline'
           color='gray'
@@ -85,44 +86,63 @@ export default function Header() {
         >
           {theme === 'light' ? <FaSun /> : <FaMoon />}
         </Button>
+
+        {/* USER MENU */}
         {currentUser ? (
           <Dropdown
             arrowIcon={false}
             inline
             label={
-              <Avatar alt='user' img={currentUser.profilePicture} rounded />
+              <Avatar
+                alt='user'
+                img={currentUser.profilePicture}
+                rounded
+              />
             }
           >
             <Dropdown.Header>
-              <span className='block text-sm'>@{currentUser.username}</span>
+              <span className='block text-sm'>
+                @{currentUser.username}
+              </span>
               <span className='block text-sm font-medium truncate'>
                 {currentUser.email}
               </span>
             </Dropdown.Header>
-            <Link to={'/dashboard?tab=profile'}>
-              <Dropdown.Item>Profile</Dropdown.Item>
-            </Link>
+
+            <Dropdown.Item as={Link} to='/dashboard?tab=profile'>
+              Profile
+            </Dropdown.Item>
+
             <Dropdown.Divider />
-            <Dropdown.Item onClick={handleSignout}>Sign out</Dropdown.Item>
+
+            <Dropdown.Item onClick={handleSignout}>
+              Sign out
+            </Dropdown.Item>
           </Dropdown>
         ) : (
-          <Link to='/sign-in'>
-            <Button gradientDuoTone='purpleToBlue' outline>
-              Sign In
-            </Button>
-          </Link>
+          // ✅ UMESTO gradientDuoTone
+          <Button
+            as={Link}
+            to='/sign-in'
+            className='bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+          >
+            Sign In
+          </Button>
         )}
+
         <Navbar.Toggle />
       </div>
+
+      {/* NAV LINKS */}
       <Navbar.Collapse>
-        <Navbar.Link active={path === '/'} as={'div'}>
-          <Link to='/'>Home</Link>
+        <Navbar.Link active={path === '/'} as={Link} to='/'>
+          Home
         </Navbar.Link>
-        <Navbar.Link active={path === '/about'} as={'div'}>
-          <Link to='/about'>About</Link>
+        <Navbar.Link active={path === '/about'} as={Link} to='/about'>
+          About
         </Navbar.Link>
-        <Navbar.Link active={path === '/projects'} as={'div'}>
-          <Link to='/projects'>Projects</Link>
+        <Navbar.Link active={path === '/projects'} as={Link} to='/projects'>
+          Projects
         </Navbar.Link>
       </Navbar.Collapse>
     </Navbar>
