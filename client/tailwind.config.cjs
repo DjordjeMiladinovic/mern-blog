@@ -1,8 +1,8 @@
-/** @type {import('tailwindcss').Config} */
-import flowbite from 'flowbite/plugin';
-import tailwindScrollbar from 'tailwind-scrollbar';
+// tailwind.config.cjs
+const flowbite = require('flowbite/plugin');
+const tailwindScrollbar = require('tailwind-scrollbar');
 
-export default {
+module.exports = {
   content: [
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
